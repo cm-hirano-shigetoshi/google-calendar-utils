@@ -30,9 +30,10 @@ class Calendar:
                 pickle.dump(creds, token)
         self.calendar_service = build("calendar", "v3", credentials=creds)
 
-    def collect_events(self, calendar_id, from_dt, to_dt):
-        time_min = dt_utils.dttz2dt(from_dt, offset=0).replace(" ", "T") + "Z"
-        time_max = dt_utils.dttz2dt(to_dt, offset=0).replace(" ", "T") + "Z"
+    def collect_events(self, calendar_id, from_dttz, to_dttz):
+        time_min = dt_utils.dttz2dt(from_dttz, offset=0).replace(" ", "T") + "Z"
+        time_max = dt_utils.dttz2dt(to_dttz, offset=0).replace(" ", "T") + "Z"
+        print(time_min, time_max)
         events_result = (
             self.calendar_service.events()
             .list(
@@ -45,6 +46,18 @@ class Calendar:
             .execute()
         )
         return events_result.get("items", [])
+
+    def collect_events_by_date(self, calendar_id, from_date, to_date=None, offset=0):
+        if to_date is None:
+            to_date = from_date
+        return self.collect_events(
+            calendar_id,
+            dt_utils.date2dttz(from_date, offset),
+            dt_utils.date2dttz(to_date, offset),
+        )
+
+    def collect_events_by_jst_date(self, calendar_id, from_date, to_date=None):
+        return self.collect_events_by_date(calendar_id, from_date, to_date, offset=9)
 
     def register_event(self, calendar_id, event):
         # print(json.dumps(event))
