@@ -33,7 +33,7 @@ class Calendar:
     def collect_events(self, calendar_id, from_dttz, to_dttz):
         time_min = dt_utils.dttz2dt(from_dttz, offset=0).replace(" ", "T") + "Z"
         time_max = dt_utils.dttz2dt(to_dttz, offset=0).replace(" ", "T") + "Z"
-        print(time_min, time_max)
+        #print(time_min, time_max)
         events_result = (
             self.calendar_service.events()
             .list(
