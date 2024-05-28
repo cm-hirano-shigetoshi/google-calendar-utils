@@ -50,10 +50,12 @@ class Calendar:
     def collect_events_by_date(self, calendar_id, from_date, to_date=None, offset=0):
         if to_date is None:
             to_date = from_date
+        from_dttz = dt_utils.date2dttz(from_date, offset)
+        to_dttz = dt_utils.date2dttz(dt_utils.add_days(to_date, 1), offset)
         return self.collect_events(
             calendar_id,
-            dt_utils.date2dttz(from_date, offset),
-            dt_utils.date2dttz(to_date, offset),
+            from_dttz,
+            to_dttz,
         )
 
     def collect_events_by_jst_date(self, calendar_id, from_date, to_date=None):
@@ -76,7 +78,15 @@ class Calendar:
 
     def delete_events(self, calendar_id, event_ids):
         for event_id in event_ids:
+            print(f"Delete: {event_id}")
             self.delete_event(calendar_id, event_id)
+
+    def delete_events_by_date(self, calendar_id, from_date, to_date=None, offset=0):
+        events = self.collect_events_by_date(calendar_id, from_date, to_date, offset)
+        self.delete_events(calendar_id, [Calendar.get_event_id(e) for e in events])
+
+    def delete_events_by_jst_date(self, calendar_id, from_date, to_date=None):
+        self.delete_events_by_date(calendar_id, from_date, to_date, offset=9)
 
     @staticmethod
     def get_event_id(event):
