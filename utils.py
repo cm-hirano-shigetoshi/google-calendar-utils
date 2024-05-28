@@ -71,19 +71,19 @@ class Calendar:
         for event in events:
             self.register_event(calendar_id, event)
 
-    def delete_event(self, calendar_id, event_id):
+    def delete_event(self, calendar_id, event):
+        print(f"Delete: {Calendar.get_event_title(event)}")
         self.calendar_service.events().delete(
-            calendarId=calendar_id, eventId=event_id
+            calendarId=calendar_id, eventId=Calendar.get_event_id(event)
         ).execute()
 
-    def delete_events(self, calendar_id, event_ids):
-        for event_id in event_ids:
-            print(f"Delete: {event_id}")
-            self.delete_event(calendar_id, event_id)
+    def delete_events(self, calendar_id, events):
+        for event in events:
+            self.delete_event(calendar_id, event)
 
     def delete_events_by_date(self, calendar_id, from_date, to_date=None, offset=0):
         events = self.collect_events_by_date(calendar_id, from_date, to_date, offset)
-        self.delete_events(calendar_id, [Calendar.get_event_id(e) for e in events])
+        self.delete_events(calendar_id, events)
 
     def delete_events_by_jst_date(self, calendar_id, from_date, to_date=None):
         self.delete_events_by_date(calendar_id, from_date, to_date, offset=9)
@@ -91,3 +91,7 @@ class Calendar:
     @staticmethod
     def get_event_id(event):
         return event["id"]
+
+    @staticmethod
+    def get_event_title(event):
+        return event["summary"]
