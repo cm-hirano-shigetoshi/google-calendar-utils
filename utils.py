@@ -1,6 +1,7 @@
 import os
 import pickle
 from dataclasses import dataclass
+from datetime import datetime
 
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
@@ -95,3 +96,11 @@ class Calendar:
     @staticmethod
     def get_event_title(event):
         return event["summary"]
+
+    @staticmethod
+    def get_start_dttz(event):
+        return datetime.fromisoformat(event["start"]["dateTime"])
+
+    @staticmethod
+    def get_end_dttz(event):
+        return datetime.fromisoformat(event["end"]["dateTime"])
