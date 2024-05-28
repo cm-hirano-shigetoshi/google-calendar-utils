@@ -33,7 +33,7 @@ class Calendar:
     def collect_events(self, calendar_id, from_dttz, to_dttz):
         time_min = dt_utils.dttz2dt(from_dttz, offset=0).replace(" ", "T") + "Z"
         time_max = dt_utils.dttz2dt(to_dttz, offset=0).replace(" ", "T") + "Z"
-        #print(time_min, time_max)
+        # print(time_min, time_max)
         events_result = (
             self.calendar_service.events()
             .list(
@@ -69,7 +69,6 @@ class Calendar:
         for event in events:
             self.register_event(calendar_id, event)
 
-    """
     def delete_event(self, calendar_id, event_id):
         self.calendar_service.events().delete(
             calendarId=calendar_id, eventId=event_id
@@ -78,4 +77,7 @@ class Calendar:
     def delete_events(self, calendar_id, event_ids):
         for event_id in event_ids:
             self.delete_event(calendar_id, event_id)
-    """
+
+    @staticmethod
+    def get_event_id(event):
+        return event["id"]
