@@ -3,10 +3,9 @@ import pickle
 from dataclasses import dataclass
 from datetime import datetime
 
+from dt_utils import dt_utils
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
-
-import dt_utils
 
 XDG_DATA_HOME = os.getenv("XDG_DATA_HOME", f'{os.environ["HOME"]}/.local/share')
 CREDENTIAL_JSON = f"{XDG_DATA_HOME}/google-calendar/credentials.json"
