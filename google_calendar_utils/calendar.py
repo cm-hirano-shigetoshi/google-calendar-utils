@@ -1,3 +1,4 @@
+import json
 import os
 import pickle
 from dataclasses import dataclass
@@ -10,13 +11,20 @@ from googleapiclient.discovery import build
 XDG_DATA_HOME = os.getenv("XDG_DATA_HOME", f'{os.environ["HOME"]}/.local/share')
 CREDENTIAL_JSON = f"{XDG_DATA_HOME}/google-calendar/credentials.json"
 PICKLE_PATH = f"{XDG_DATA_HOME}/google-calendar/GoogleCalendarApi.pickle"
+CALENDAR_ID_JSON = f"{XDG_DATA_HOME}/google-calendar/calendar_ids.json"
 
 
 @dataclass
 class Calendar:
     calendar_service = None
+    ids = {}
 
-    def __init__(self, credential_json=CREDENTIAL_JSON, pickle_path=PICKLE_PATH):
+    def __init__(
+        self,
+        credential_json=CREDENTIAL_JSON,
+        pickle_path=PICKLE_PATH,
+        calendar_ids_json=CALENDAR_ID_JSON,
+    ):
         creds = None
         if os.path.exists(pickle_path):
             with open(pickle_path, "rb") as token:
@@ -29,6 +37,9 @@ class Calendar:
             with open(pickle_path, "wb") as token:
                 pickle.dump(creds, token)
         self.calendar_service = build("calendar", "v3", credentials=creds)
+        if os.path.exists(calendar_ids_json):
+            with open(calendar_ids_json) as f:
+                self.ids = json.load(f)
 
     def collect_events(self, calendar_id, from_dttz, to_dttz):
         time_min = dt_utils.dttz2dt(from_dttz, offset=0).replace(" ", "T") + "Z"
@@ -37,7 +48,7 @@ class Calendar:
         events_result = (
             self.calendar_service.events()
             .list(
-                calendarId=calendar_id,
+                calendarId=self.ids[calendar_id],
                 timeMin=time_min,
                 timeMax=time_max,
                 singleEvents=True,
@@ -64,7 +75,7 @@ class Calendar:
     def register_event(self, calendar_id, event):
         # print(json.dumps(event))
         self.calendar_service.events().insert(
-            calendarId=calendar_id, body=event
+            calendarId=self.ids[calendar_id], body=event
         ).execute()
 
     def register_events(self, calendar_id, events):
@@ -74,7 +85,7 @@ class Calendar:
     def delete_event(self, calendar_id, event):
         print(f"Delete: {Calendar.get_event_title(event)}")
         self.calendar_service.events().delete(
-            calendarId=calendar_id, eventId=Calendar.get_event_id(event)
+            calendarId=self.ids[calendar_id], eventId=Calendar.get_event_id(event)
         ).execute()
 
     def delete_events(self, calendar_id, events):
